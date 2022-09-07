@@ -3,6 +3,7 @@ package me.shroomz.voterewards.Votes;
 import com.vexsoftware.votifier.model.VotifierEvent;
 import me.shroomz.voterewards.Commands.VoteCommand;
 import me.shroomz.voterewards.Configuration.Message.MessageContext;
+import me.shroomz.voterewards.Signboard.TopPlayerSignFetcher;
 import me.shroomz.voterewards.Storage.MysqlVoteStorage;
 import me.shroomz.voterewards.Storage.VoteStorage;
 import me.shroomz.voterewards.Utils.BrokenNag;

@@ -6,3 +6,22 @@ softdepend: [Vault, PlaceholderAPI]
 api-version: 1.19
 authors: [ LeShroomz ]
 description: Giving players rewards based on the votes they give for your server
+commands:
+  voterewards:
+    description: VoteRewards main command.
+    aliases:
+      - vr
+  vote:
+    description: VoteRewards vote command.
+  votestreak:
+    description: VoteRewards streak command.
+    aliases:
+      - vstreak
+      - vrstreak
+permissions:
+  voterewards.notify:
+    default: true
+  voterewards.votes.others:
+    default: op
+  voterewards.admin:
+    default: op

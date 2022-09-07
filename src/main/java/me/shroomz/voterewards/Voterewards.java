@@ -1,12 +1,18 @@
 package me.shroomz.voterewards;
 
 import lombok.Getter;
+import me.shroomz.voterewards.Commands.VoteCommand;
 import me.shroomz.voterewards.Configuration.VoteConfiguration;
+import me.shroomz.voterewards.Scoreboard.ScoreboardHandler;
+import me.shroomz.voterewards.Signboard.TopPlayerSignFetcher;
+import me.shroomz.voterewards.Signboard.TopPlayerSignListener;
+import me.shroomz.voterewards.Signboard.TopPlayerSignStorage;
 import me.shroomz.voterewards.Storage.QueuedVotesStorage;
 import me.shroomz.voterewards.Storage.RecentVoteStorage;
 import me.shroomz.voterewards.Storage.VoteStorage;
 import me.shroomz.voterewards.Utils.BrokenNag;
 import me.shroomz.voterewards.Utils.Cooldowns.VoteServiceCooldown;
+import me.shroomz.voterewards.Votes.VoteListener;
 import me.shroomz.voterewards.Votes.VoteReminder;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
@@ -28,6 +34,10 @@ public final class Voterewards extends JavaPlugin {
     private VoteServiceCooldown voteServiceCooldown;
     @Getter
     private VoteConfiguration configuration;
+    @Getter
+    private ScoreboardHandler scoreboardHandler;
+    @Getter
+    private TopPlayerSignStorage topPlayerSignStorage;
     private BukkitTask voteReminderTask;
 
 
@@ -58,7 +68,14 @@ public final class Voterewards extends JavaPlugin {
         }
 
         recentVoteStorage = new RecentVoteStorage();
+        scoreboardHandler = new ScoreboardHandler();
         voteServiceCooldown = new VoteServiceCooldown(getConfig().getInt("votes.cooldown-per-service", 3600));
+        topPlayerSignStorage = new TopPlayerSignStorage();
+        try {
+            topPlayerSignStorage.load(new File(getDataFolder(), "top_voter_signs.json"));
+        } catch (IOException e) {
+            throw new RuntimeException("Exception whilst loading top player signs", e);
+        }
 
         int r = getConfig().getInt("vote-reminder.repeat");
         String text = getConfig().getString("vote-reminder.message");
@@ -67,6 +84,9 @@ public final class Voterewards extends JavaPlugin {
                 voteReminderTask = getServer().getScheduler().runTaskTimerAsynchronously(this, new VoteReminder(), 20 * r, 20 * r);
             }
         }
+
+        registerCommands();
+        registerEventsAndListeners();
 
     }
 
@@ -90,6 +110,21 @@ public final class Voterewards extends JavaPlugin {
         if(getServer().getPluginManager().getPlugin("Vault") != null){
             getLogger().info("Vault detected.");
         }
+    }
+
+    public void registerCommands(){
+        getCommand("voterewards").setExecutor(new VoteCommand());
+        getCommand("vote").setExecutor(configuration.getVoteCommand());
+        getCommand("votestreak").setExecutor(configuration.getVoteStreakCommand());
+    }
+
+    public void registerEventsAndListeners(){
+        getServer().getPluginManager().registerEvents(new VoteListener(), this);
+        getServer().getPluginManager().registerEvents(new TopPlayerSignListener(), this);
+        getServer().getScheduler().runTaskTimerAsynchronously(this, voteStorage::save, 20, 20 *30);
+        getServer().getScheduler().runTaskTimerAsynchronously(this, queuedVotes::save, 20, 20 * 30);
+        getServer().getScheduler().runTaskAsynchronously(this, Voterewards.getPlugin().getScoreboardHandler()::doPopulate);
+        getServer().getScheduler().runTaskAsynchronously(this, new TopPlayerSignFetcher(topPlayerSignStorage.getSignList()));
     }
 
     public void reloadPlugin() {
