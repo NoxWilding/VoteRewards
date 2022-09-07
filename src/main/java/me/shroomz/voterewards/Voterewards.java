@@ -2,6 +2,7 @@ package me.shroomz.voterewards;
 
 import lombok.Getter;
 import me.shroomz.voterewards.Commands.VoteCommand;
+import me.shroomz.voterewards.Configuration.Message.Placeholder.Placeholders;
 import me.shroomz.voterewards.Configuration.VoteConfiguration;
 import me.shroomz.voterewards.Scoreboard.ScoreboardHandler;
 import me.shroomz.voterewards.Signboard.TopPlayerSignFetcher;
@@ -106,6 +107,7 @@ public final class Voterewards extends JavaPlugin {
     public void dependencyCheck(){
         if(getServer().getPluginManager().getPlugin("PlaceholderAPI") != null){
             getLogger().info("PlaceholderAPI detected, providing extra placeholders.");
+            new Placeholders().register();
         }
         if(getServer().getPluginManager().getPlugin("Vault") != null){
             getLogger().info("Vault detected.");
