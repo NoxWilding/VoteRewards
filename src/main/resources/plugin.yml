@@ -1,0 +1,8 @@
+name: VoteRewards
+version: '${project.version}'
+main: me.shroomz.voterewards.Voterewards
+depend: [Votifier]
+softdepend: [Vault, PlaceholderAPI]
+api-version: 1.19
+authors: [ LeShroomz ]
+description: Giving players rewards based on the votes they give for your server
